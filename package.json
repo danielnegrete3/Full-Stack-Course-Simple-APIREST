@@ -1,0 +1,28 @@
+{
+  "name": "person-api",
+  "version": "1.0.0",
+  "description": "An exemple to simple api rest",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielnegrete3/Full-Stack-Course-Simple-APIREST.git"
+  },
+  "author": "Daniel Alejandro Negrete Gomez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danielnegrete3/Full-Stack-Course-Simple-APIREST/issues"
+  },
+  "homepage": "https://github.com/danielnegrete3/Full-Stack-Course-Simple-APIREST#readme",
+  "dependencies": {
+    "expres": "^0.0.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
