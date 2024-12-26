@@ -1,6 +1,12 @@
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+// Crear un token personalizado para capturar el cuerpo de la solicitud
+morgan.token('body', (req) => JSON.stringify(req.body));
+// app.use(morgan('tiny'));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms body: :body'));
+
 
 app.use(express.json());
 
