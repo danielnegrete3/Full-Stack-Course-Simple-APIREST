@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "build:ui": "@powershell if (Test-path -path './dist') {Remove-Item -Recurse -Force dist} ; cd '../../Full Stack react/part2/phoneBook' ; npm run build ; Copy-Item dist -Recurse './../../../Full Stack Apis/Person Api'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,11 +20,13 @@
   },
   "homepage": "https://github.com/danielnegrete3/Full-Stack-Course-Simple-APIREST#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "expres": "^0.0.5",
     "express": "^4.21.2",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "standard": "^17.1.2"
   }
 }
