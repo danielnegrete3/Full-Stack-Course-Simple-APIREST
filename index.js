@@ -61,7 +61,7 @@ app.put('/api/persons/:id', (req, res, next) => {
         name: body.name,
         number: body.number
     }
-    Person.findByIdAndUpdate(id,person,{new: true}).then(updatedPerson => {
+    Person.findByIdAndUpdate(id,person,{ new: true,runValidators: true, context: 'query' }).then(updatedPerson => {
         res.json(updatedPerson)
     }).catch(error => next(error))
 });
@@ -73,21 +73,9 @@ app.put('/api/persons/:id', (req, res, next) => {
 //     return maxId + 1
 // }
 
-app.post('/api/persons', (req, res) => {  
+app.post('/api/persons', (req, res,next) => {
     const body = req.body;
-    console.log(req.body);
-    if(!body.name || !body.number){
-        return res.status(400).json({
-            error: 'name or number missing'
-        });
-    }
-    Person.find({name: body.name}).then(person => {
-        if(person.length > 0){
-            return res.status(400).json({
-                error: 'name must be unique'
-            });
-        }
-    })
+    console.log(req.body)
 
     const person = new Person({
         name: body.name,
@@ -96,19 +84,21 @@ app.post('/api/persons', (req, res) => {
 
     person.save().then(savedPerson => {
         res.json(savedPerson)
-    })
+    }).catch(error => next(error))
 });
 
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
-  
+
     if (error.name === 'CastError') {
-      return response.status(400).send({ error: 'malformatted id' })
-    } 
-  
+        return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
+
     next(error)
   }
-  
+
   // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
   app.use(errorHandler)
 
