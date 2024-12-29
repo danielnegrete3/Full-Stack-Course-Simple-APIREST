@@ -15,7 +15,7 @@ const url =
 
 mongoose.set('strictQuery',false)
 
-mongoose.connect(url)
+mongoose.connect(url,{ dbName: 'PhoneBook' })
 
 const personSchema = new mongoose.Schema({
   name: String,

@@ -1,78 +1,77 @@
+require('dotenv').config();
 const express = require('express');
-const morgan = require('morgan');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const Person = require('./models/person');
 
-const app = express();
+
+// const morgan = require('morgan');
 // Crear un token personalizado para capturar el cuerpo de la solicitud
-morgan.token('body', (req) => JSON.stringify(req.body));
+// morgan.token('body', (req) => JSON.stringify(req.body));
 // app.use(morgan('tiny'));
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms body: :body'));
+// app.use(morgan(':method :url :status :res[content-length] - :response-time ms body: :body'));
 
-
+if (process.env.PASSWORD === undefined) {
+    console.log('give password as environment variable')
+    process.exit(1)
+}
+const app = express();
+app.disable('x-powered-by');
 app.use(express.json());
 app.use(cors())
 app.use(express.static('dist'))
 
-let Persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 app.get('/api/persons', (req, res) => {
-    res.json(Persons);
-    }
-);
+    Person.find({}).then(persons => {
+        res.json(persons)
+    })
+});
 
 app.get('/info', (req, res) => {
     const date = new Date();
-    res.send(`<p>Phonebook has info for ${Persons.length} people</p>
-    <p>${date}</p>`);
-    }
-);
+    Person.find({}).then(persons => {
+        res.send(`<p>Phonebook has info for ${persons.length} people</p>
+        <p>${date}</p>`);
+    })
+});
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const person = Persons.find(person => person.id === id);
-    if(person){
-        res.json(person);
-    } else {
-        res.status(404).end();
-    }
-    }
-);
+app.get('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id;
+    Person.findById(id).then(person => {
+        if(person){
+            res.json(person)
+        }else{
+            res.status(404).end()
+        }
+    }).catch(error => next(error))
+});
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    Persons = Persons.filter(person => person.id !== id);
-    console.log(Persons);
-    res.status(204).end();
-    }
-);
+app.delete('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id;
+    Person.findByIdAndDelete(id).then(() => {
+        res.status(204).end();
+    }).catch(error => next(error))
+});
 
-const GenerId = () => {
-    const maxId = Persons.length > 0
-    ? Math.max(...Persons.map(n => n.id))
-    : 0
-    return maxId + 1
-}
+app.put('/api/persons/:id', (req, res, next) => {
+    const body = req.body;
+    const id = req.params.id;
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+    Person.findByIdAndUpdate(id,person,{new: true}).then(updatedPerson => {
+        res.json(updatedPerson)
+    }).catch(error => next(error))
+});
+
+// const GenerId = () => {
+//     const maxId = Persons.length > 0
+//     ? Math.max(...Persons.map(n => n.id))
+//     : 0
+//     return maxId + 1
+// }
 
 app.post('/api/persons', (req, res) => {  
     const body = req.body;
@@ -82,23 +81,42 @@ app.post('/api/persons', (req, res) => {
             error: 'name or number missing'
         });
     }
-    if(Persons.find(person => person.name === body.name)){
-        return res.status(400).json({
-            error: 'name must be unique'
-        });
-    }
-    const person = {
-        id: GenerId(),
+    Person.find({name: body.name}).then(person => {
+        if(person.length > 0){
+            return res.status(400).json({
+                error: 'name must be unique'
+            });
+        }
+    })
+
+    const person = new Person({
         name: body.name,
         number: body.number
-    }
+    })
 
-    Persons = Persons.concat(person);
-    res.json(person);
-    }
-);
+    person.save().then(savedPerson => {
+        res.json(savedPerson)
+    })
+});
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } 
+  
+    next(error)
+  }
+  
+  // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
+  app.use(errorHandler)
 
 const PORT = process.env.PORT??3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT} http://localhost:${PORT}`);
+})
+
+app.on('close', () => {
+    mongoose.connection.close()
 })

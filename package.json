@@ -21,6 +21,7 @@
   "homepage": "https://github.com/danielnegrete3/Full-Stack-Course-Simple-APIREST#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "expres": "^0.0.5",
     "express": "^4.21.2",
     "mongoose": "^8.9.2",

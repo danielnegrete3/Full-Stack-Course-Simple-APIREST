@@ -1,0 +1,25 @@
+GET http://localhost:3001
+
+###
+GET http://localhost:3001/api/persons
+
+###
+POST  http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "040-123456"
+}
+
+###
+DELETE http://localhost:3001/api/persons/6771c606a6faabd4bb2bff68
+
+###
+PUT http://localhost:3001/api/persons/6771cb84751d1d168a90a99f
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "040-87569"
+}
