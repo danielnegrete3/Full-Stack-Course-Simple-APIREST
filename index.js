@@ -11,8 +11,8 @@ const Person = require('./models/person');
 // app.use(morgan('tiny'));
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms body: :body'));
 
-if (process.env.PASSWORD === undefined) {
-    console.log('give password as environment variable')
+if (process.env.MONGODB_URI === undefined) {
+    console.log('give mongodb uri as environment variable')
     process.exit(1)
 }
 const app = express();
